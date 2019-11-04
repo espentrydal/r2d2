@@ -2,9 +2,11 @@
 # Movement functions
 #
 from adafruit_motorkit import MotorKit
-import sleep from time
+import sleep, monotonic from time
+import r2d2_defines
 
 # Low-level definitions
+differential = 0
 MIN_SPEED = 40
 SPEED_TABLE_INTERVAL = 10
 NBR_SPEEDS = 1 + (100 - MIN_SPEED)/SPEED_TABLE_INTERVAL
@@ -12,6 +14,7 @@ NBR_SPEEDS = 1 + (100 - MIN_SPEED)/SPEED_TABLE_INTERVAL
 speed_table = [40, 50, 60, 70, 80, 90, 100] # speeds
 rotation_time = [5500, 3300, 2400, 2000, 1750, 1550, 1150] # time
 
+motor_speed = [0, 0]            # left and right motor speeds stored here (0-100%)
 
 # Mid-level definitions
 kit = MotorKit()
@@ -20,9 +23,9 @@ move_state = MOV_STOP           # what robot is doing
 move_speed = 0                  # move speed stored here (0-100%)
 speed_increment = 10            # percent to increase or decrease speed
 
-#def move_begin():
-# Not necessary?
-
+def move_begin():
+    move_stop()
+    
 def move_left():
     change_move_state(MOV_LEFT)
     kit.motor1.throttle = 0
@@ -43,25 +46,49 @@ def move_backward():
     kit.motor1.throttle = -move_speed
     kit.motor2.throttle = -move_speed
 
-def move_rotate():              # Needs more work
+def move_rotate():
     change_move_state(MOV_ROTATE)
-    print("Rotating ") # Add angle
-    #if angle < 0
-    #elif angle > 0
+    print("Rotating ", angle)
+    if angle < 0:
+        print(" (left)")
+        kit.motor1.throttle = -move_speed
+        kit.motor2.throttle = move_speed
+        angle = - angle
+    elif angle > 0:
+        print(" (right)")
+        kit.motor1.throttle = move_speed
+        kit.motor2.throttle = -move_speed
+    ms = rotation_angle_to_time(angle, move_speed)
+    moving_delay(ms)
+    move_brake()
+        
 
 def move_stop():
     change_move_state(MOV_STOP)
     kit.motor1.throttle = 0
     kit.motor2.throttle = 0
 
-# Add? Not finished.
-def move_Brake():
+def move_brake():
+    move_stop()
 
-def move_set_speed(speed):
+def move_speed(speed):
+    if motor == MOTOR_LEFT && speed > differential:
+        speed -= differential
+    motor_speed[motor] = speed    
 
 def move_slower(decrement):
+    print(" Slower: ", end='')
+    if move_speed >= speed_increment + MIN_SPEED:
+        move_speed -= speed_increment
+    else:
+        move_speed = MIN_SPEED
 
 def move_faster(increment):
+    print(" Faster: ")
+    move_speed += speed_increment
+    if move_speed > 100:
+        move_speed = 100
+    move_set_speed(move_speed)
 
 def move_get_state():
     return move_state
@@ -121,6 +148,34 @@ def calibrate_rotation_rate(direction, angle):
 # low level movement state.
 # it will differ from the command state when the robot is avoiding obstacles
 def change_move_state(new_state):
-    
+    if new_state != move_state:
+        print("Changing move state from ", states[move_state], " to ", states[new_state])
+        move_state = new_state
 
+#
+# high level movement functions
+#
+# moves in the given direction at the curent speed for the given duration in milliseconds
+def timed_move(direction, duration):
+    print("Timed move ", end='')
+    if direction == MOV_FORWARD:
+        print("forward")
+    elif direction == MOV_BACK:
+        print("back")
+    else:
+        print("?")
 
+    moving_delay(duration)
+    move_stop()
+
+# check for obstacles while delaying the given duration in ms
+def moving_delay(duration):
+    start_time = monotonic()*0.001
+    while monotonic()*0.001 - start_time < duration:
+        # function in =look= module checks for obstacle in direction of movement
+        if check_movement() == False:
+            if move_state != MOV_ROTATE: # rotate is only valid movement
+                print("Stopping in moving_delay()")
+                move_brake()
+
+# End of move.py
