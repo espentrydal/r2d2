@@ -14,7 +14,9 @@ NBR_SPEEDS = 1 + (100 - MIN_SPEED)/SPEED_TABLE_INTERVAL
 speed_table = [40, 50, 60, 70, 80, 90, 100] # speeds
 rotation_time = [5500, 3300, 2400, 2000, 1750, 1550, 1150] # time
 
-motor_speed = [0, 0]            # left and right motor speeds stored here (0-100%)
+# left and right motor speeds stored here (0-100%), to be used instead
+# of move_speed if differential speed needs to be taken into account.
+motor_speed = [0, 0]
 
 # Mid-level definitions
 kit = MotorKit()
@@ -62,7 +64,6 @@ def move_rotate():
     moving_delay(ms)
     move_brake()
         
-
 def move_stop():
     change_move_state(MOV_STOP)
     kit.motor1.throttle = 0
@@ -71,8 +72,17 @@ def move_stop():
 def move_brake():
     move_stop()
 
-def move_speed(speed):
-    if motor == MOTOR_LEFT && speed > differential:
+def move_set_speed(speed):
+    # move_speed sets both motors to same speed. motor_speed[motor]
+    # (set by calling motor_set_speed) takes in to account the
+    # differential constant set above in definitions for motors that
+    # responds unequally to the MotorKit throttle function.
+    motor_set_speed(MOTOR_LEFT, speed)
+    motor_set_speed(MOTOR_RIGHT, speed)
+    move_speed = speed
+    
+def motor_set_speed(motor, speed):
+    if (motor == MOTOR_LEFT) && (speed > differential):
         speed -= differential
     motor_speed[motor] = speed    
 
@@ -155,6 +165,7 @@ def change_move_state(new_state):
 #
 # high level movement functions
 #
+
 # moves in the given direction at the curent speed for the given duration in milliseconds
 def timed_move(direction, duration):
     print("Timed move ", end='')

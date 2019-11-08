@@ -4,6 +4,7 @@
 #from adafruit_motorkit import MotorKit
 #from time import sleep
 import move
+import look
 
 move_set_speed(MIN_SPEED + 10)
 print("Ready")
