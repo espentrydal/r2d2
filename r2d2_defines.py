@@ -18,7 +18,7 @@ OBST_REAR = 5
 MOTOR_LEFT = 0; MOTOR_RIGHT = 1
 
 MOV_LEFT = 0; MOV_RIGHT = 1; MOV_FORWARD = 2; MOV_BACK = 3;
-MOV_ROTATE = 5; MOV_STOP = 6
+MOV_ROTATE = 4; MOV_STOP = 5
 states = ["Left", "Right", "Forward", "Back", "Rotate", "Stop"]
 
 def map_range(x, in_min, in_max, out_min, out_max):

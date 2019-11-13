@@ -7,13 +7,14 @@ from move import *
 from look import *
 from RPi.GPIO import cleanup
 
-move_set_speed(MIN_SPEED + 10)
+m = Move()
+m.move_set_speed(m.MIN_SPEED + 10)
 print("Ready!")
 
 if __name__ == '__main__':
     try:
         while True:
-            move_forward()
+            m.move_forward()
             roam()
 
     except KeyboardInterrupt:   # Reset by pressing CTRL + C

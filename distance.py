@@ -2,7 +2,7 @@
 # distance sensor code
 #
 import RPi.GPIO as gpio
-from time import sleep, monotonic
+from time import sleep, time
 
 #
 # code for ping distance sensor
@@ -19,18 +19,18 @@ def ping_get_distance(ping_pin):
     gpio.output(ping_pin, True)
  
     # set Trigger after 0.01ms to LOW
-    time.sleep(0.00001)
+    sleep(0.00001)
     gpio.output(ping_pin, False)
  
     ### RECEIVING 
     gpio.setup(ping_pin, gpio.IN)
 
     # save start time
-    start_time = time.time()
-    stop_time = time.time()
+    start_time = time()
+    stop_time = time()
     while gpio.input(ping_pin) == 0:
-        start_time = time.time()
-        if time.time()-start_time > 20e-3:
+        start_time = time()
+        if time()-start_time > 20e-3:
             # if a pulse does not arrive within 20 ms the ping sensor is
             # not connected
             print("Ping sensor not connected")
@@ -38,7 +38,7 @@ def ping_get_distance(ping_pin):
  
     # save time of arrival
     while gpio.input(ping_pin) == 1:
-        stop_time = time.time()
+        stop_time = time()
  
     # time difference between start and arrival
     time_elapsed = stop_time - start_time

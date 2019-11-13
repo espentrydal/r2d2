@@ -7,7 +7,6 @@ from softservo import *
 from distance import *
 
 # servo defines
-s = Soft_servo()
 sweep_servo_pin = 17            # pin connected to servo (BCM #)
 servo_delay = 500               # time in ms for servo to move
 
@@ -20,11 +19,11 @@ servo_angles = [150, 30, 90]
 
 ping_pin = 27                   # ping connected to ping signal pin (BCM #)
 
-def look_begin():
-#    ir_sensor_begin()           # initializes sensors !!! IR SENSORS DISABLED
-    s.soft_servo_attach(sweep_servo_pin) # attaches the servo pin to the servo object
+s = Soft_servo(sweep_servo_pin) # attaches the servo pin to the servo object
 
 # !!! IR SENSORS DISABLED
+#def look_begin():
+#    ir_sensor_begin()           # initializes sensors !!! IR SENSORS DISABLED
 # def look_for_obstacle(obstacle):
 #     "returns true if the given obstacle is detected"
 #     if obstacle == OBST_FRONT_EDGE:
