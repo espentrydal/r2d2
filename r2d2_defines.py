@@ -1,6 +1,6 @@
 # Global defines
 
-# Defines for directions
+# Defines for directionse
 DIR_LEFT = 0
 DIR_RIGHT = 1
 DIR_CENTER =2
@@ -17,12 +17,12 @@ OBST_REAR = 5
 
 MOTOR_LEFT = 0; MOTOR_RIGHT = 1
 
-MOV_LEFT = 0; MOV_RIGHT = 1; MOV_FORWARD = 2; MOV_BACK = 3;
+MOV_LEFT = 0; MOV_RIGHT = 1; MOV_FORWARD = 2; MOV_BACK = 3
 MOV_ROTATE = 4; MOV_STOP = 5
 states = ["Left", "Right", "Forward", "Back", "Rotate", "Stop"]
 
 def map_range(x, in_min, in_max, out_min, out_max):
-    "Corresponds to map() function on Arduino."
+    "Corresponds to map() function on Arduino. Only integers, not floating point."
     return (x - in_min)*(out_max - out_min)/(in_max - in_min) + out_min
 
 
