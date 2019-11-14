@@ -1,9 +1,9 @@
 # Global defines
 
-# Defines for directionse
+# Defines for directions
 DIR_LEFT = 0
 DIR_RIGHT = 1
-DIR_CENTER =2
+DIR_CENTER = 2
 
 location_string = ["Left", "Right", "Center"]
 
