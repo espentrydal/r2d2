@@ -3,7 +3,7 @@
 #
 from adafruit_motorkit import MotorKit
 from time import sleep, monotonic
-from r2d2_defines import*
+from r2d2_defines import *
 from look import Look
 
 class Move:
