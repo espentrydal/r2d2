@@ -4,7 +4,7 @@
 from adafruit_motorkit import MotorKit
 from time import sleep, monotonic
 from r2d2_defines import *
-from look import Look
+#from look import Look
 
 class Move:
     def __init__(self):
@@ -188,13 +188,14 @@ class Move:
 
     def moving_delay(self, duration):
         """check for obstacles while delaying the given duration in ms"""
-        l = Look()
+#        l = Look()
         start_time = monotonic()*1e-3
         while monotonic()*0.001 - start_time < duration:
+            pass
             # function in =look= module checks for obstacle in direction of movement
-            if l.check_movement() == False:
-                if self.move_state != MOV_ROTATE: # rotate is only valid movement
-                    print("Stopping in moving_delay()")
-                    self.move_brake()
+#            if l.check_movement() == False:
+#                if self.move_state != MOV_ROTATE: # rotate is only valid movement
+#                    print("Stopping in moving_delay()")
+#                    self.move_brake()
 
-    # End of move.py
+# End of file

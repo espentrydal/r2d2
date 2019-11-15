@@ -88,33 +88,31 @@ class Look:
         distance = self.look_at(self.servo_angles[DIR_CENTER])
         print("roam: distance: ", distance)
         if distance == 0:
-            self.m.move_stop()
+            m.move_stop()
             print("No front sensor")
             return                  # no sensor
         elif distance <= self.MIN_DISTANCE:
-            self.m.move_stop()
+            m.move_stop()
             print("Scanning:")
             left_distance = self.look_at(self.servo_angles[DIR_LEFT])
             if left_distance > self.CLEAR_DISTANCE:
                 print(" moving left: ")
-                self.m.move_rotate(-90)
+                m.move_rotate(-90)
             else:
                 sleep(0.5)
                 right_distance = self.look_at(self.servo_angles[DIR_RIGHT])
                 if right_distance > self.CLEAR_DISTANCE:
                     # print(" moving right: ")
-                    self.m.move_rotate(90)
+                    m.move_rotate(90)
                 else:
                     # print(" no clearance : ")
                     distance = max(left_distance, right_distance)
                     if distance < self.CLEAR_DISTANCE/2:
-                        self.m.timed_move(MOV_BACK, 1000) # back up for one second
-                        self.m.move_rotate(-180)
+                        m.timed_move(MOV_BACK, 1000) # back up for one second
+                        m.move_rotate(-180)
                     else:
                         if left_distance > right_distance:
-                            self.m.move_rotate(-90)
+                            m.move_rotate(-90)
                         else:
-
-                            self.m.move_rotate(90)
-
-    # End file
+                            m.move_rotate(90)
+# End file
