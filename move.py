@@ -88,11 +88,6 @@ class Move:
         self.move_speed = speed
         print("move_speed is now:", self.move_speed)
 
-    # def motor_set_speed(self, motor, speed):
-    #     if (motor == MOTOR_LEFT) and (speed > self.differential):
-    #         speed -= self.differential
-    #         self.motor_speed[motor] = speed    
-
     def move_slower(self, decrement):
         print(" Slower: ", end='')
         if self.move_speed >= self.speed_increment + self.MIN_SPEED:

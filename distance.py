@@ -29,7 +29,6 @@ def ping_get_distance(ping_pin):
     start_time = time()
     stop_time = time()
     while gpio.input(ping_pin) == 0:
-        start_time = time()
         if time()-start_time > 20e-3:
             # if a pulse does not arrive within 20 ms the ping sensor is
             # not connected
