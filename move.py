@@ -4,7 +4,7 @@
 from adafruit_motorkit import MotorKit
 from time import sleep, monotonic
 from r2d2_defines import *
-#from look import Look
+from look import Look
 
 class Move:
     def __init__(self):
@@ -15,7 +15,7 @@ class Move:
         self.NBR_SPEEDS = 1 + (100 - self.MIN_SPEED)/self.SPEED_TABLE_INTERVAL
 
         self.speed_table = [40, 50, 60, 70, 80, 90, 100] # speeds
-        self.rotation_time = [5500, 3300, 2400, 2000, 1750, 1550, 1150] # time
+        self.rotation_time = [2450, 1740, 1420, 1224, 1120, 1020, 920] # time
 
         # left and right motor speeds stored here (0-100%), to be used instead
         # of move_speed if differential speed needs to be taken into account.
@@ -23,10 +23,12 @@ class Move:
 
         # Mid-level definitions
         self.kit = MotorKit()
-        self.move_state = MOV_STOP           # what robot is doing
+        self.move_state = MOV_STOP # what robot is doing
 
-        self.move_speed = 0                  # move speed stored here (0-100%)
-        self.speed_increment = 10            # percent to increase or decrease speed
+        self.move_speed = 0       # move speed stored here (0-100%)
+        self.speed_increment = 10 # percent to increase or decrease speed
+        self.l = Look()
+
     def move_begin(self):
         self.move_stop()
 
@@ -62,9 +64,9 @@ class Move:
             print(" (right)")
             self.kit.motor1.throttle = self.move_speed/100
             self.kit.motor2.throttle = -self.move_speed/100
-            ms = self.rotation_angle_to_time(angle, self.move_speed)
-            self.moving_delay(ms)
-            self.move_brake()
+        ms = self.rotation_angle_to_time(angle, self.move_speed)
+        self.moving_delay(ms)
+        self.move_brake()
 
     def move_stop(self):
         self.change_move_state(MOV_STOP)
@@ -81,14 +83,15 @@ class Move:
         unequally to the MotorKit throttle function.
 
         """
-        self.motor_set_speed(MOTOR_LEFT, speed)
-        self.motor_set_speed(MOTOR_RIGHT, speed)
+        # self.motor_set_speed(MOTOR_LEFT, speed)
+        # self.motor_set_speed(MOTOR_RIGHT, speed)
         self.move_speed = speed
+        print("move_speed is now:", self.move_speed)
 
-    def motor_set_speed(self, motor, speed):
-        if (motor == MOTOR_LEFT) and (speed > self.differential):
-            speed -= self.differential
-            self.motor_speed[motor] = speed    
+    # def motor_set_speed(self, motor, speed):
+    #     if (motor == MOTOR_LEFT) and (speed > self.differential):
+    #         speed -= self.differential
+    #         self.motor_speed[motor] = speed    
 
     def move_slower(self, decrement):
         print(" Slower: ", end='')
@@ -99,7 +102,7 @@ class Move:
 
     def move_faster(self, increment):
         print(" Faster: ")
-        move_speed += speed_increment
+        self.move_speed += self.speed_increment
         if move_speed > 100:
             move_speed = 100
             self.move_set_speed(move_speed)
@@ -124,7 +127,7 @@ class Move:
         if speed >= 100:
             full_rotation_time = self.rotation_time[self.NBR_SPEEDS-1]
         else:
-            i = (speed - self.MIN_SPEED) / self.SPEED_TABLE_INTERVAL
+            i = int((speed - self.MIN_SPEED) / self.SPEED_TABLE_INTERVAL)
             t0 = self.rotation_time[i]
             t1 = self.rotation_time[i+1]
             full_rotation_time = map_range(speed, self.speed_table[i],
@@ -154,7 +157,7 @@ class Move:
 
             print(location_string[direction], ": rotate", angle, " degrees at speed ",
                   speed, " for ", time, " ms")
-            sleep(time)
+            sleep(time*1e-3)
             self.kit.motor1.throttle = 0
             self.kit.motor2.throttle = 0
             sleep(2)                # two second delay between speeds
@@ -167,13 +170,14 @@ class Move:
             print("Changing move state from ", states[self.move_state],
                   " to ", states[new_state])
             self.move_state = new_state
+            print("move_state is now", self.move_state)
 
     #
     # high level movement functions
     #
 
     def timed_move(self, direction, duration):
-        """# moves in the given direction at the curent speed for the given
+        """moves in the given direction at the curent speed for the given
         duration in milliseconds"""
         print("Timed move ", end='')
         if direction == MOV_FORWARD:
@@ -182,20 +186,61 @@ class Move:
             print("back")
         else:
             print("?")
+        print("Duration:", duration)
 
         self.moving_delay(duration)
         self.move_stop()
 
     def moving_delay(self, duration):
         """check for obstacles while delaying the given duration in ms"""
-#        l = Look()
-        start_time = monotonic()*1e-3
-        while monotonic()*0.001 - start_time < duration:
-            pass
-            # function in =look= module checks for obstacle in direction of movement
-#            if l.check_movement() == False:
-#                if self.move_state != MOV_ROTATE: # rotate is only valid movement
-#                    print("Stopping in moving_delay()")
-#                    self.move_brake()
+        start_time = monotonic()
+        while (monotonic() - start_time)*1e3 < duration:
+            if self.check_movement() == False:
+                if self.move_state != MOV_ROTATE: # rotate is only valid movement
+                    print("Stopping in moving_delay()")
+                    self.move_brake()
 
-# End of file
+    def check_movement(self):
+        """Function to check if robot can continue moving in current direction.
+        Returns true if robot is not blocked moving in current direction.
+        This version only tests for obstacles in front."""
+        is_clear = True             # default return value if no obstacles
+        # !!! IR_SENSORS DISABLED
+        if self.move_state == MOV_FORWARD:
+             if self.l.look_for_obstacle(OBST_FRONT) == True:
+                 is_clear = False
+        return is_clear
+
+    def roam(self):
+        "Look for and avoid obstacles using servo to scan."
+        print("Roaming: ")
+        distance = self.l.look_at(self.l.servo_angles[DIR_CENTER])
+        print("roam: distance: ", distance)
+        if distance == 0:
+            self.move_stop()
+            print("No front sensor")
+            return                  # no sensor
+        elif distance <= self.l.MIN_DISTANCE:
+            self.move_stop()
+            print("Scanning:")
+            left_distance = self.l.look_at(self.l.servo_angles[DIR_LEFT])
+            if left_distance > self.l.CLEAR_DISTANCE:
+                print(" moving left: ")
+                self.move_rotate(-90)
+            else:
+                sleep(0.5)
+                right_distance = self.l.look_at(self.l.servo_angles[DIR_RIGHT])
+                if right_distance > self.l.CLEAR_DISTANCE:
+                    # print(" moving right: ")
+                    self.move_rotate(90)
+                else:
+                    # print(" no clearance : ")
+                    distance = max(left_distance, right_distance)
+                    if distance < self.l.CLEAR_DISTANCE/2:
+                        self.timed_move(MOV_BACK, 1000) # back up for one second
+                        self.move_rotate(-180)
+                    else:
+                        if left_distance > right_distance:
+                            self.move_rotate(-90)
+                        else:
+                            self.move_rotate(90)
