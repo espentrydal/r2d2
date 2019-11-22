@@ -12,7 +12,7 @@ class Move:
         self.differential = 0
         self.MIN_SPEED = 40
         self.SPEED_TABLE_INTERVAL = 10
-        self.NBR_SPEEDS = 1 + (100 - self.MIN_SPEED)/self.SPEED_TABLE_INTERVAL
+        self.NBR_SPEEDS = int(1 + (100 - self.MIN_SPEED)/self.SPEED_TABLE_INTERVAL)
 
         self.speed_table = [40, 50, 60, 70, 80, 90, 100] # speeds
         self.rotation_time = [2450, 1740, 1420, 1224, 1120, 1020, 920] # time
@@ -34,44 +34,44 @@ class Move:
 
     def move_left(self):
         self.change_move_state(MOV_LEFT)
-        self.kit.motor1.throttle = 0
-        self.kit.motor2.throttle = self.move_speed/100
+        self.kit.motor3.throttle = 0
+        self.kit.motor4.throttle = self.move_speed/100
 
     def move_right(self):
         self.change_move_state(MOV_RIGHT)
-        self.kit.motor1.throttle = self.move_speed/100
-        self.kit.motor2.throttle = 0
+        self.kit.motor3.throttle = self.move_speed/100
+        self.kit.motor4.throttle = 0
 
     def move_forward(self):
         self.change_move_state(MOV_FORWARD)
-        self.kit.motor1.throttle = self.move_speed/100
-        self.kit.motor2.throttle = self.move_speed/100
+        self.kit.motor3.throttle = self.move_speed/100
+        self.kit.motor4.throttle = self.move_speed/100
 
     def move_backward(self):
         self.change_move_state(MOV_BACK)
-        self.kit.motor1.throttle = -self.move_speed/100
-        self.kit.motor2.throttle = -self.move_speed/100
+        self.kit.motor3.throttle = -self.move_speed/100
+        self.kit.motor4.throttle = -self.move_speed/100
 
     def move_rotate(self, angle):
         self.change_move_state(MOV_ROTATE)
         print("Rotating ", angle)
         if angle < 0:
             print(" (left)")
-            self.kit.motor1.throttle = -self.move_speed/100
-            self.kit.motor2.throttle = self.move_speed/100
+            self.kit.motor3.throttle = -self.move_speed/100
+            self.kit.motor4.throttle = self.move_speed/100
             angle = - angle
         elif angle > 0:
             print(" (right)")
-            self.kit.motor1.throttle = self.move_speed/100
-            self.kit.motor2.throttle = -self.move_speed/100
+            self.kit.motor3.throttle = self.move_speed/100
+            self.kit.motor4.throttle = -self.move_speed/100
         ms = self.rotation_angle_to_time(angle, self.move_speed)
         self.moving_delay(ms)
         self.move_brake()
 
     def move_stop(self):
         self.change_move_state(MOV_STOP)
-        self.kit.motor1.throttle = 0
-        self.kit.motor2.throttle = 0
+        self.kit.motor3.throttle = 0
+        self.kit.motor4.throttle = 0
 
     def move_brake(self):
         self.move_stop()
@@ -138,12 +138,12 @@ class Move:
         for speed in range(self.MIN_SPEED, 100, self.SPEED_TABLE_INTERVAL):
             sleep(1)
             if direction == DIR_LEFT: # rotate left
-                self.kit.motor1.throttle = -speed/100
-                self.kit.motor2.throttle = speed/100
+                self.kit.motor3.throttle = -speed/100
+                self.kit.motor4.throttle = speed/100
 
             elif direction == DIR_RIGHT: # rotate right
-                self.kit.motor1.throttle = speed/100
-                self.kit.motor2.throttle = -speed/100
+                self.kit.motor3.throttle = speed/100
+                self.kit.motor4.throttle = -speed/100
 
             else:
                 print("Invalid direction")
@@ -153,8 +153,8 @@ class Move:
             print(location_string[direction], ": rotate", angle, " degrees at speed ",
                   speed, " for ", time, " ms")
             sleep(time*1e-3)
-            self.kit.motor1.throttle = 0
-            self.kit.motor2.throttle = 0
+            self.kit.motor3.throttle = 0
+            self.kit.motor4.throttle = 0
             sleep(2)                # two second delay between speeds
 
     def change_move_state(self, new_state):
