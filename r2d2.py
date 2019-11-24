@@ -8,7 +8,6 @@ from RPi.GPIO import cleanup
 import traceback
 from bluedot import BlueDot
 from signal import pause
-from r2d2_defines import MOV_STOP
 
 class R2D2:
     button_pressed = 0
@@ -28,7 +27,6 @@ class R2D2:
             self.m.move_forward()
             print("move_speed:", self.m.move_speed)
             self.m.roam()
-                
 
         except KeyboardInterrupt:   # Reset by pressing CTRL + C
             print("Error:", traceback.format_exc())
