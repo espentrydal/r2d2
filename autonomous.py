@@ -11,15 +11,10 @@ from signal import pause
 
 class R2D2:
     button_pressed = 0
-    
-    @classmethod
-    def toggle_press(cls, value):
-        cls.button_pressed = value
-
+   
     def __init__(self):
         self.m = Move()
         self.bd = BlueDot()
-
         self.m.move_set_speed(self.m.MIN_SPEED)
 
     def start(self):
@@ -49,6 +44,7 @@ if __name__ == '__main__':
     r = R2D2()
     print("Ready!")
     
+    # How to respond to Bluedot app
     r.bd.when_pressed = r.start
     r.bd.when_moved = r.start
     r.bd.when_released = r.stop

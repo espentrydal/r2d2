@@ -6,8 +6,12 @@ from time import sleep
 import io
 
 def main():
+    "Main robot logic for manual control
+    "
+    # Setting up serial over bluetooth
     ser = Serial('/dev/rfcomm0', timeout=1)
     ser.reset_input_buffer()
+    # Setting up io stream to read unicode string
     sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
     sio.flush()
 
@@ -29,24 +33,32 @@ def main():
                 print("x: ", joy_x)
                 print("y: ", joy_y)
 
+                # Joystick left
                 if joy_x < 50:
                     m.move_rotate(-90)
                     sleep(1)
+                # Joystick right
                 if joy_x > 200:
                     m.move_rotate(90)
                     sleep(1)
+                # Joystick not forward
                 if joy_y < 200:
+                    # Joystick backward
                     if joy_y < 50:
                         m.move_backward()
                         sleep(1)
+                    # Joystick neutral
                     else:
                         m.move_stop()
                         sleep(1)
+                # Joystick forward
                 if joy_y > 200:
                     m.move_forward()
                     sleep(1)
+                    
                 ser.reset_input_buffer()
                 ser.reset_output_buffer()
+
             else:
                 ser.reset_input_buffer()
                 ser.reset_output_buffer()

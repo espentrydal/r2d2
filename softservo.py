@@ -8,6 +8,7 @@ from r2d2_defines import map_range
 
 class Soft_servo:
     def __init__(self, pin):
+        # Setting up servo
         self.freq = 50                   # Frequency in Hz (50Hz = 20 ms)
         self.servo_pin = pin
         gpio.setmode(gpio.BCM)

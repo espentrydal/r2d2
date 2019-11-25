@@ -10,15 +10,16 @@ bus.write_byte_data(address, 0x40, 0x00)
 bus.write_byte_data(address, 0xF0, 0x55)
 bus.write_byte_data(address, 0xFB, 0x00)
 
+# Setting up bluetooth communication
 ser = Serial('/dev/rfcomm0', timeout=1)
 ser.reset_output_buffer()
-sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser)) # to transmit unicode strings
+# Uses io text stream to transmit unicode strings
+sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser)) 
 sio.flush()
 
+# Setting up communication with STM32 Nucleo
 ser_mbed = Serial('/dev/ttyACM0', 9600, timeout=1)
 ser_mbed.reset_input_buffer()
-#sio_mbed = io.TextIOWrapper(io.BufferedRWPair(ser_mbed, ser_mbed))
-#sio_mbed.flush()
                             
 time.sleep(2)
 
