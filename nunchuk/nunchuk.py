@@ -15,9 +15,11 @@ ser.reset_output_buffer()
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser)) # to transmit unicode strings
 sio.flush()
 
-ser_mbed = Serial('/dev/ttyACM0', 9600)
+ser_mbed = Serial('/dev/ttyACM0', 9600, timeout=1)
 ser_mbed.reset_input_buffer()
-
+#sio_mbed = io.TextIOWrapper(io.BufferedRWPair(ser_mbed, ser_mbed))
+#sio_mbed.flush()
+                            
 time.sleep(2)
 
 try:
@@ -35,17 +37,26 @@ try:
         joy_y = data[1]
 
         message = '\n' + str(data[0]) + "," + str(data[1]) + '\n'
-        ser.reset_output_buffer()
 
-        if enable[1] == ' 1':
-            sio.write(message)
-            print("Joystick enabled, sending: ", message)
-        else:
-            print("Joystic disabled.")
+        ser.reset_output_buffer()
+        print("In waiting? ", ser_mbed.inWaiting())
+        if ser_mbed.inWaiting() > 0:
+            from_mbed = ser_mbed.readline().strip().split(b',')
+            print(str(from_mbed[1]))
+
+            if from_mbed[1] == b' 1':
+                sio.write(message)
+                print("Joystick enabled, sending: ", message)
+            else:
+                print("Joystic disabled.")
+                
         sio.flush()
+        ser_mbed.reset_input_buffer()
  
 except IOError as e:
     print(e)
     sio.flush()
-    ser.reset_output_buffer
+    ser.reset_output_buffer()
     ser.close()
+    ser_mbed.reset_output_buffer()
+    ser_mbed.close()
