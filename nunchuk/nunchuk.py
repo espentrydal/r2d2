@@ -15,6 +15,9 @@ ser.reset_output_buffer()
 sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser)) # to transmit unicode strings
 sio.flush()
 
+ser_mbed = Serial('/dev/ttyACM0', 9600)
+ser_mbed.reset_input_buffer()
+
 time.sleep(2)
 
 try:
@@ -33,10 +36,13 @@ try:
 
         message = '\n' + str(data[0]) + "," + str(data[1]) + '\n'
         ser.reset_output_buffer()
-        sio.write(message)
-        print(message)
+
+        if enable[1] == ' 1':
+            sio.write(message)
+            print("Joystick enabled, sending: ", message)
+        else:
+            print("Joystic disabled.")
         sio.flush()
-#        ser.reset_output_buffer()
  
 except IOError as e:
     print(e)
