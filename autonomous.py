@@ -1,8 +1,6 @@
 #
 # Main robot logic
 #
-#from adafruit_motorkit import MotorKit
-#from time import sleep
 from move import Move
 from RPi.GPIO import cleanup
 import traceback
@@ -10,8 +8,6 @@ from bluedot import BlueDot
 from signal import pause
 
 class R2D2:
-    button_pressed = 0
-   
     def __init__(self):
         self.m = Move()
         self.bd = BlueDot()
